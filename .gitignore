@@ -1,0 +1,48 @@
+# Gradle #
+!gradle/wrapper/gradle-wrapper.jar
+!gradle-wrapper.properties
+.gradle/
+**/build/
+!src/**/build/
+gradle-app.setting
+.gradletasknamecache
+
+# Local project configurations #
+.settings/
+.idea/
+*.iml
+rebel.xml
+.classpath
+.project
+
+# Compiled source #
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Output folder #
+target/
+out/
+build/
+
+# Packages #
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# OS generated files #
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
