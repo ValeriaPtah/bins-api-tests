@@ -6,11 +6,13 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 
 import java.io.File;
 import java.util.Objects;
 
 import static bins.model.Bin.getRecordBuilder;
+import static util.PropertiesHelper.getDeleteCreateKey;
 import static util.PropertiesHelper.getReadOnlyKey;
 
 public class BinsHelper {
@@ -51,14 +53,24 @@ public class BinsHelper {
         return new File((Objects.requireNonNull(classLoader.getResource("schemas/" + schemaName)).getFile()));
     }
 
-    public static Bin getBinById(String binId) {
+    public static int statusOnGetExistingBinById(String binId) {
         return RestAssured.given()
                 .basePath("/b/" + binId)
                 .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
                 .when()
                 .get()
-                .body()
-                .as(Bin.class);
+                .statusCode();
+    }
+
+    public static String getExistingBinId() {
+        Response response = RestAssured.given()
+                .basePath("/b")
+                .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
+                .body(BinsHelper.toJson(testBinsEntry(), Bin.class))
+                .when()
+                .post();
+
+        return response.body().jsonPath().get("metadata.id");
     }
 
 }

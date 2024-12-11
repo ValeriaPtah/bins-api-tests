@@ -11,14 +11,12 @@ import org.testng.annotations.Test;
 import util.BinsHelper;
 import util.Headers;
 
-import java.io.File;
-
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 import static util.PropertiesHelper.getDeleteCreateKey;
 import static util.PropertiesHelper.getMasterKey;
+import static util.Schemas.CREATION_SCHEMA;
 
 public class BinsCreationTest extends BaseBinsTest {
-    private final static File CREATION_SCHEMA = BinsHelper.getJsonSchema("created-bin-response-schema.json");
     private final static Bin VALID_TEST_BIN = BinsHelper.testBinsEntry();
 
     @BeforeClass
@@ -35,7 +33,7 @@ public class BinsCreationTest extends BaseBinsTest {
                 .post()
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(CREATION_SCHEMA));
+                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
     }
 
     @Test
@@ -47,7 +45,7 @@ public class BinsCreationTest extends BaseBinsTest {
                 .post()
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(CREATION_SCHEMA));
+                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
     }
 
     @Test

@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "versionsDeleted": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "versionsDeleted"
+      ]
+    },
+    "message": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "metadata",
+    "message"
+  ]
+}
