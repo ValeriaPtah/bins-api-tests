@@ -4,14 +4,13 @@ import bins.BaseBinsTest;
 import bins.model.BinRequestBody;
 import com.squareup.moshi.Moshi;
 import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import static util.PropertiesHelper.getDeleteCreateKey;
@@ -21,16 +20,7 @@ import static util.PropertiesHelper.getReadOnlyKey;
 public class BinsHelper {
 
     private static final Moshi MOSHI = new Moshi.Builder().build();
-
-    public static void testSetup(String path) {
-        RestAssured.basePath = path;
-        RestAssured.requestSpecification = new RequestSpecBuilder()
-                .setContentType(ContentType.JSON)
-                .build();
-        RestAssured.responseSpecification = new ResponseSpecBuilder()
-                .expectContentType(ContentType.JSON)
-                .build();
-    }
+    private static final Map<Integer, String> VERSION_ETAG = new HashMap<>();
 
     public static BinRequestBody testBinRequestBody() {
         return BinRequestBody.builder()
@@ -74,7 +64,15 @@ public class BinsHelper {
         return getBinWithTwoVersions_Public().get("metadata.parentId");
     }
 
-    private static JsonPath getCreatedBin(boolean isPrivate) {
+    public static String getEtagByVersion(int version) {
+        return VERSION_ETAG.get(version);
+    }
+
+    public static String getEtagLatestVersion() {
+        return VERSION_ETAG.get(VERSION_ETAG.size());
+    }
+
+    public static JsonPath getCreatedBin(boolean isPrivate) {
         Response response = RestAssured.given()
                 .basePath("/b")
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
@@ -92,7 +90,7 @@ public class BinsHelper {
         String existingBinId = getCreatedBin_ID(false);
         Response response = null;
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 1; i <= 2; i++) {
             response = RestAssured.given()
                     .basePath("/b/" + existingBinId)
                     .header(Headers.MASTER_KEY.getName(), getMasterKey())
@@ -100,6 +98,7 @@ public class BinsHelper {
                     .body(BinsHelper.toJson(testBinRequestBody(), BinRequestBody.class))
                     .when()
                     .put();
+            VERSION_ETAG.put(i, response.body().jsonPath().get("record.data.etag"));
         }
 
         return response.body().jsonPath();

@@ -1,8 +1,11 @@
 package bins;
 
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.testng.annotations.AfterClass;
@@ -17,8 +20,8 @@ import static util.PropertiesHelper.getMasterKey;
 
 public class BaseBinsTest {
 
+    protected final static String BASE_PATH = "/b/";
     private final static List<String> CREATED_BINS_IDS = new ArrayList<>();
-    private final static String BASE_PATH = "/b/";
 
     @BeforeClass
     public static void before() {
@@ -34,6 +37,16 @@ public class BaseBinsTest {
         RestAssured.requestSpecification = null;
         RestAssured.responseSpecification = null;
         cleanUpCreatedBins();
+    }
+
+    public static void testSetup(String path) {
+        RestAssured.basePath = path;
+        RestAssured.requestSpecification = new RequestSpecBuilder()
+                .setContentType(ContentType.JSON)
+                .build();
+        RestAssured.responseSpecification = new ResponseSpecBuilder()
+                .expectContentType(ContentType.JSON)
+                .build();
     }
 
     public static void addToCreatedBinsIds(String binId) {

@@ -2,8 +2,10 @@ package bins.read;
 
 import bins.BaseBinsTest;
 import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import util.BinsHelper;
@@ -17,11 +19,10 @@ import static util.PropertiesHelper.getReadOnlyKey;
 import static util.Schemas.BIN_SCHEMA;
 
 public class BinsReadTest extends BaseBinsTest {
-    private final static String BASE_PATH = "/b/";
 
     @BeforeClass
     public static void setup() {
-        BinsHelper.testSetup("");
+        testSetup("");
     }
 
     @Test
@@ -71,10 +72,10 @@ public class BinsReadTest extends BaseBinsTest {
     @Test
     public void canReadSpecificVersion() {
         String existingBinId = BinsHelper.getBinWithTwoVersions_ID();
-        String versionNumber = "2";
+        String version = "1";
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId + "/" + versionNumber)
+                .basePath(BASE_PATH + existingBinId + "/" + version)
                 .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
                 .when()
                 .get();
@@ -82,6 +83,9 @@ public class BinsReadTest extends BaseBinsTest {
                 .then()
                 .statusCode(HttpStatus.SC_OK)
                 .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
+
+        Assert.assertEquals(BinsHelper.getEtagByVersion(Integer.parseInt(version)),
+                response.getBody().jsonPath().getString("record.data.etag"));
     }
 
     @Test
@@ -118,17 +122,38 @@ public class BinsReadTest extends BaseBinsTest {
 
     @Test
     public void canReadLatestVersion() {
-    }
+        String existingBinId = BinsHelper.getBinWithTwoVersions_ID();
 
-    @Test(enabled = false)
-    public void canReadAllBins() {
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + "675c7448e41b4d34e464e58a")
-                .header(Headers.MASTER_KEY.getName(), getMasterKey())
+                .basePath(BASE_PATH + existingBinId + "/latest")
+                .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
                 .when()
                 .get();
         response
                 .then()
-                .statusCode(HttpStatus.SC_OK);
+                .statusCode(HttpStatus.SC_OK)
+                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
+
+        Assert.assertEquals(BinsHelper.getEtagLatestVersion(),
+                response.getBody().jsonPath().getString("record.data.etag"));
+    }
+
+    @Test
+    public void canReadLatestVersion_NoVersion() {
+        JsonPath existingBin = BinsHelper.getCreatedBin(false);
+        String existingBinId = existingBin.get("metadata.id");
+
+        Response response = RestAssured.given()
+                .basePath(BASE_PATH + existingBinId + "/latest")
+                .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
+                .when()
+                .get();
+        response
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
+
+        Assert.assertEquals(existingBin.get("record.data.etag"),
+                response.getBody().jsonPath().getString("record.data.etag"));
     }
 }

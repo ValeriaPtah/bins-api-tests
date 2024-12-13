@@ -23,7 +23,7 @@ public class BinsNegativeCreationTest extends BaseBinsTest {
 
     @BeforeClass
     public static void setup() {
-        BinsHelper.testSetup("/b");
+        testSetup("/b");
     }
 
     /**

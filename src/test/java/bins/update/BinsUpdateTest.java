@@ -22,11 +22,10 @@ import static util.PropertiesHelper.getUpdateOnlyKey;
  */
 public class BinsUpdateTest extends BaseBinsTest {
     private final static BinRequestBody VALID_TO_UPDATE_BIN_REQUEST_BODY = BinsHelper.testBinRequestBody();
-    private final static String BASE_PATH = "/b/";
 
     @BeforeClass
     public static void setup() {
-        BinsHelper.testSetup("");
+        testSetup("");
     }
 
     @Test

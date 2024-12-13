@@ -21,11 +21,10 @@ import static util.Schemas.ERROR_SCHEMA;
  * Documentation: <a href="https://jsonbin.io/api-reference/bins/delete">Delete Bins API</a>
  */
 public class BinsDeletionTest extends BaseBinsTest {
-    private final static String BASE_PATH = "/b/";
 
     @BeforeClass
     public static void setup() {
-        BinsHelper.testSetup("");
+        testSetup("");
     }
 
     @Test
