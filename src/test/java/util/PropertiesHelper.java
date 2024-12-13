@@ -24,7 +24,7 @@ public class PropertiesHelper {
 
     private static String getProperty(String propertyName) {
         Properties prop = new Properties();
-        ClassLoader classLoader = BinsHelper.class.getClassLoader();
+        ClassLoader classLoader = PropertiesHelper.class.getClassLoader();
         try (InputStream stream = classLoader.getResourceAsStream("bins.properties")) {
             prop.load(stream);
         } catch (IOException e) {

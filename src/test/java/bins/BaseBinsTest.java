@@ -9,6 +9,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeClass;
 import util.Headers;
 
@@ -36,6 +37,10 @@ public class BaseBinsTest {
         RestAssured.basePath = "";
         RestAssured.requestSpecification = null;
         RestAssured.responseSpecification = null;
+    }
+
+    @AfterSuite
+    public void cleanUp() {
         cleanUpCreatedBins();
     }
 
@@ -59,11 +64,13 @@ public class BaseBinsTest {
 
     private static void cleanUpCreatedBins() {
         for (String binId : CREATED_BINS_IDS) {
-            RestAssured.given()
+            Response response = RestAssured.given()
                     .basePath(BASE_PATH + binId)
                     .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                     .when()
-                    .delete()
+                    .delete();
+
+            response
                     .then()
                     .statusCode(HttpStatus.SC_OK);
         }
