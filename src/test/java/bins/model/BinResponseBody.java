@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Bin {
+public class BinResponseBody {
 
     @Json
     private Record record;
@@ -29,13 +29,5 @@ public class Bin {
 
         @Json(name = "private")
         private boolean access;
-    }
-
-    public boolean isPrivate() {
-        return this.getMetadata().isAccess();
-    }
-
-    public static Record.RecordBuilder getRecordBuilder() {
-        return Record.builder();
     }
 }

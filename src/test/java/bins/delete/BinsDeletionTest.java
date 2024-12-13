@@ -10,6 +10,8 @@ import org.testng.annotations.Test;
 import util.BinsHelper;
 import util.Headers;
 
+import java.io.File;
+
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 import static util.PropertiesHelper.getDeleteCreateKey;
 import static util.PropertiesHelper.getMasterKey;
@@ -19,6 +21,9 @@ import static util.Schemas.ERROR_SCHEMA;
 
 public class BinsDeletionTest extends BaseBinsTest {
     private final static String BASE_PATH = "/b/";
+    private final static int SUCCESS_STATUS = HttpStatus.SC_OK;
+    private final static File DELETED_MESSAGE_SCHEMA = DELETION_SCHEMA.getSchemaFile();
+    private final static File ERROR_MESSAGE_SCHEMA = ERROR_SCHEMA.getSchemaFile();
 
     @BeforeClass
     public static void setup() {
@@ -27,7 +32,7 @@ public class BinsDeletionTest extends BaseBinsTest {
 
     @Test
     public void canDeleteBin_MasterKey() {
-        String existingBinId = BinsHelper.getExistingBinId();
+        String existingBinId = BinsHelper.getExistingBinById();
 
         Response response = RestAssured.given()
                 .basePath(BASE_PATH + existingBinId)
@@ -35,16 +40,16 @@ public class BinsDeletionTest extends BaseBinsTest {
                 .when()
                 .delete();
         response.then()
-                .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(DELETION_SCHEMA.getSchemaFile()));
+                .statusCode(SUCCESS_STATUS)
+                .body(matchesJsonSchema(DELETED_MESSAGE_SCHEMA));
 
         String deletedBinId = response.body().jsonPath().get("metadata.id");
-        Assert.assertEquals(BinsHelper.statusOnGetExistingBinById(deletedBinId), HttpStatus.SC_NOT_FOUND);
+        Assert.assertEquals(BinsHelper.getStatusCode_GetBinById(deletedBinId), HttpStatus.SC_NOT_FOUND);
     }
 
     @Test
     public void canDeleteBin_AccessKey() {
-        String existingBinId = BinsHelper.getExistingBinId();
+        String existingBinId = BinsHelper.getExistingBinById();
 
         Response response = RestAssured.given()
                 .basePath(BASE_PATH + existingBinId)
@@ -53,11 +58,11 @@ public class BinsDeletionTest extends BaseBinsTest {
                 .delete();
         response
                 .then()
-                .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(DELETION_SCHEMA.getSchemaFile()));
+                .statusCode(SUCCESS_STATUS)
+                .body(matchesJsonSchema(DELETED_MESSAGE_SCHEMA));
 
         String deletedBinId = response.body().jsonPath().get("metadata.id");
-        Assert.assertEquals(BinsHelper.statusOnGetExistingBinById(deletedBinId), HttpStatus.SC_NOT_FOUND);
+        Assert.assertEquals(BinsHelper.getStatusCode_GetBinById(deletedBinId), HttpStatus.SC_NOT_FOUND);
     }
 
     @Test
@@ -71,7 +76,7 @@ public class BinsDeletionTest extends BaseBinsTest {
                 .delete()
                 .then()
                 .statusCode(HttpStatus.SC_NOT_FOUND)
-                .body(matchesJsonSchema(ERROR_SCHEMA.getSchemaFile()));
+                .body(matchesJsonSchema(ERROR_MESSAGE_SCHEMA));
     }
 
     @Test
@@ -85,7 +90,7 @@ public class BinsDeletionTest extends BaseBinsTest {
                 .delete()
                 .then()
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
-                .body(matchesJsonSchema(ERROR_SCHEMA.getSchemaFile()));
+                .body(matchesJsonSchema(ERROR_MESSAGE_SCHEMA));
     }
 
     @Test
@@ -98,7 +103,7 @@ public class BinsDeletionTest extends BaseBinsTest {
                 .delete()
                 .then()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED)
-                .body(matchesJsonSchema(ERROR_SCHEMA.getSchemaFile()));
+                .body(matchesJsonSchema(ERROR_MESSAGE_SCHEMA));
     }
 
     @Test
@@ -112,6 +117,6 @@ public class BinsDeletionTest extends BaseBinsTest {
                 .delete()
                 .then()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED)
-                .body(matchesJsonSchema(ERROR_SCHEMA.getSchemaFile()));
+                .body(matchesJsonSchema(ERROR_MESSAGE_SCHEMA));
     }
 }

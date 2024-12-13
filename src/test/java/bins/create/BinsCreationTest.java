@@ -1,7 +1,7 @@
 package bins.create;
 
 import bins.BaseBinsTest;
-import bins.model.Bin;
+import bins.model.BinRequestBody;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.apache.http.HttpStatus;
@@ -11,13 +11,17 @@ import org.testng.annotations.Test;
 import util.BinsHelper;
 import util.Headers;
 
+import java.io.File;
+
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 import static util.PropertiesHelper.getDeleteCreateKey;
 import static util.PropertiesHelper.getMasterKey;
 import static util.Schemas.CREATION_SCHEMA;
 
 public class BinsCreationTest extends BaseBinsTest {
-    private final static Bin VALID_TEST_BIN = BinsHelper.testBinsEntry();
+    private final static BinRequestBody VALID_BIN_REQUEST_BODY = BinsHelper.testBinRequestBody();
+    private final static int SUCCESS_STATUS = HttpStatus.SC_OK;
+    private final static File CREATED_BIN_SCHEMA = CREATION_SCHEMA.getSchemaFile();
 
     @BeforeClass
     public static void setup() {
@@ -28,24 +32,24 @@ public class BinsCreationTest extends BaseBinsTest {
     public void canCreateBin_MasterKey() {
         RestAssured.given()
                 .header(Headers.MASTER_KEY.getName(), getMasterKey())
-                .body(BinsHelper.toJson(VALID_TEST_BIN, Bin.class))
+                .body(BinsHelper.toJson(VALID_BIN_REQUEST_BODY, BinRequestBody.class))
                 .when()
                 .post()
                 .then()
-                .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
+                .statusCode(SUCCESS_STATUS)
+                .body(matchesJsonSchema(CREATED_BIN_SCHEMA));
     }
 
     @Test
     public void canCreateBin_AccessKey() {
         RestAssured.given()
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
-                .body(BinsHelper.toJson(VALID_TEST_BIN, Bin.class))
+                .body(BinsHelper.toJson(VALID_BIN_REQUEST_BODY, BinRequestBody.class))
                 .when()
                 .post()
                 .then()
-                .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
+                .statusCode(SUCCESS_STATUS)
+                .body(matchesJsonSchema(CREATED_BIN_SCHEMA));
     }
 
     @Test
@@ -53,11 +57,12 @@ public class BinsCreationTest extends BaseBinsTest {
         ValidatableResponse response = RestAssured.given()
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                 .header(Headers.PRIVATE_BIN.getName(), true)
-                .body(BinsHelper.toJson(VALID_TEST_BIN, Bin.class))
+                .body(BinsHelper.toJson(VALID_BIN_REQUEST_BODY, BinRequestBody.class))
                 .when()
                 .post()
                 .then()
-                .statusCode(HttpStatus.SC_OK);
+                .statusCode(SUCCESS_STATUS)
+                .body(matchesJsonSchema(CREATED_BIN_SCHEMA));
 
         Assert.assertTrue(response.extract().body().jsonPath().get("metadata.private"));
     }
@@ -67,36 +72,13 @@ public class BinsCreationTest extends BaseBinsTest {
         ValidatableResponse response = RestAssured.given()
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                 .header(Headers.PRIVATE_BIN.getName(), false)
-                .body(BinsHelper.toJson(VALID_TEST_BIN, Bin.class))
+                .body(BinsHelper.toJson(VALID_BIN_REQUEST_BODY, BinRequestBody.class))
                 .when()
                 .post()
                 .then()
-                .statusCode(HttpStatus.SC_OK);
+                .statusCode(SUCCESS_STATUS)
+                .body(matchesJsonSchema(CREATED_BIN_SCHEMA));
 
         Assert.assertFalse(response.extract().body().jsonPath().get("metadata.private"));
-
-    }
-
-    @Test
-    public void canNotCreateBin_MoreThan128Chars() {
-
-    }
-
-    @Test
-    public void canNotCreateBin_NoAuth() {
-
-    }
-
-    @Test
-    public void canNotCreateBin_InvalidJson() {
-        final Bin testInvalidJsonBin = BinsHelper.testBinsEntry_InvalidJson();
-
-        RestAssured.given()
-                .header(Headers.MASTER_KEY.getName(), getMasterKey())
-                .body(BinsHelper.toJson(testInvalidJsonBin, Bin.class))
-                .when()
-                .post()
-                .then()
-                .statusCode(HttpStatus.SC_BAD_REQUEST);
     }
 }

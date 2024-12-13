@@ -1,6 +1,6 @@
 package util;
 
-import bins.model.Bin;
+import bins.model.BinRequestBody;
 import com.squareup.moshi.Moshi;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -11,7 +11,6 @@ import io.restassured.response.Response;
 import java.io.File;
 import java.util.Objects;
 
-import static bins.model.Bin.getRecordBuilder;
 import static util.PropertiesHelper.getDeleteCreateKey;
 import static util.PropertiesHelper.getReadOnlyKey;
 
@@ -29,15 +28,15 @@ public class BinsHelper {
                 .build();
     }
 
-    public static Bin testBinsEntry() {
-        return Bin.builder()
-                .record(getRecordBuilder().data("{'sample': 'Hello World'}").build())
+    public static BinRequestBody testBinRequestBody() {
+        return BinRequestBody.builder()
+                .data("{'sample': 'Hello World'}")
                 .build();
     }
 
-    public static Bin testBinsEntry_InvalidJson() {
-        return Bin.builder()
-                .record(getRecordBuilder().data("smth").build())
+    public static BinRequestBody testBinRequestBody_InvalidJson() {
+        return BinRequestBody.builder()
+                .data("smth")
                 .build();
     }
 
@@ -53,7 +52,7 @@ public class BinsHelper {
         return new File((Objects.requireNonNull(classLoader.getResource("schemas/" + schemaName)).getFile()));
     }
 
-    public static int statusOnGetExistingBinById(String binId) {
+    public static int getStatusCode_GetBinById(String binId) {
         return RestAssured.given()
                 .basePath("/b/" + binId)
                 .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
@@ -62,11 +61,12 @@ public class BinsHelper {
                 .statusCode();
     }
 
-    public static String getExistingBinId() {
+    //TODO refactor for purpose
+    public static String getExistingBinById() {
         Response response = RestAssured.given()
                 .basePath("/b")
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
-                .body(BinsHelper.toJson(testBinsEntry(), Bin.class))
+                .body(BinsHelper.toJson(testBinRequestBody(), BinRequestBody.class))
                 .when()
                 .post();
 
