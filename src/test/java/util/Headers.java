@@ -9,7 +9,8 @@ public enum Headers {
     MASTER_KEY("X-Master-Key"),
     ACCESS_KEY("X-Access-Key"),
     PRIVATE_BIN("X-Bin-Private"),
-    BIN_NAME("X-Bin-Name");
+    BIN_NAME("X-Bin-Name"),
+    VERSIONING("X-Bin-Versioning");
 
     private final String name;
 }

@@ -1,11 +1,13 @@
 package util;
 
+import bins.BaseBinsTest;
 import bins.model.BinRequestBody;
 import com.squareup.moshi.Moshi;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 
 import java.io.File;
@@ -34,9 +36,9 @@ public class BinsHelper {
                 .build();
     }
 
-    public static BinRequestBody testBinRequestBody_InvalidJson() {
+    public static BinRequestBody testBinRequestBody_updated() {
         return BinRequestBody.builder()
-                .data("smth")
+                .data("{'sample': 'Hello New World!'}")
                 .build();
     }
 
@@ -62,14 +64,25 @@ public class BinsHelper {
     }
 
     public static String getCreatedBinId() {
+        return getCreatedBinId(true);
+    }
+
+    public static String getCreatedBinId(boolean isPrivate) {
+        String binId = getCreatedBin(isPrivate).get("metadata.id");
+        BaseBinsTest.addToCreatedBinsIds(binId);
+        return binId;
+    }
+
+    public static JsonPath getCreatedBin(boolean isPrivate) {
         Response response = RestAssured.given()
                 .basePath("/b")
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
+                .header(Headers.PRIVATE_BIN.getName(), isPrivate)
                 .body(BinsHelper.toJson(testBinRequestBody(), BinRequestBody.class))
                 .when()
                 .post();
 
-        return response.body().jsonPath().get("metadata.id");
+        return response.body().jsonPath();
     }
 
 }

@@ -16,6 +16,9 @@ import static util.PropertiesHelper.getDeleteCreateKey;
 import static util.PropertiesHelper.getMasterKey;
 import static util.Schemas.CREATION_SCHEMA;
 
+/**
+ * Documentation: <a href="https://jsonbin.io/api-reference/bins/create">Create Bins API</a>
+ */
 public class BinsCreationTest extends BaseBinsTest {
     private final static BinRequestBody VALID_BIN_REQUEST_BODY = BinsHelper.testBinRequestBody();
 
@@ -86,6 +89,25 @@ public class BinsCreationTest extends BaseBinsTest {
                 .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
 
         Assert.assertFalse(response.body().jsonPath().get("metadata.private"));
+
+        addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
+    }
+
+    @Test
+    public void canCreateBin_SetName() {
+        String binName = "Bin Name";
+        Response response = RestAssured.given()
+                .header(Headers.MASTER_KEY.getName(), getMasterKey())
+                .header(Headers.BIN_NAME.getName(), binName)
+                .body(BinsHelper.toJson(VALID_BIN_REQUEST_BODY, BinRequestBody.class))
+                .when()
+                .post();
+        response
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
+
+        Assert.assertEquals(binName, response.body().jsonPath().get("metadata.name"));
 
         addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
     }

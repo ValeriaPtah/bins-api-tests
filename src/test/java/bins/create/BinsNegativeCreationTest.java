@@ -1,5 +1,6 @@
 package bins.create;
 
+import bins.BaseBinsTest;
 import bins.model.BinRequestBody;
 import io.restassured.RestAssured;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -14,7 +15,10 @@ import static util.PropertiesHelper.getMasterKey;
 import static util.PropertiesHelper.getReadOnlyKey;
 import static util.Schemas.ERROR_SCHEMA;
 
-public class BinsNegativeCreationTest {
+/**
+ * Documentation: <a href="https://jsonbin.io/api-reference/bins/create">Create Bins API</a>
+ */
+public class BinsNegativeCreationTest extends BaseBinsTest {
     private final static BinRequestBody VALID_TEST_BIN_RESPONSE_BODY = BinsHelper.testBinRequestBody();
 
     @BeforeClass
@@ -24,7 +28,7 @@ public class BinsNegativeCreationTest {
 
     /**
      * As per documentation, blank name is not allowed (should be between 1-128 characters) so this test reveals a bug
-     * <a href="https://jsonbin.io/api-reference/bins/create#request-headers">X-BinResponseBody-Name</a>
+     * <a href="https://jsonbin.io/api-reference/bins/create#request-headers">X-Bin-Name</a>
      */
     @Test
     public void canNotCreateBin_NameBlank() {
@@ -76,12 +80,9 @@ public class BinsNegativeCreationTest {
     }
 
     @Test
-    public void canNotCreateBin_InvalidJson() {
-        final BinRequestBody testInvalidJsonBinResponseBody = BinsHelper.testBinRequestBody_InvalidJson();
-
+    public void canNotCreateBin_BlankBin() {
         RestAssured.given()
                 .header(Headers.MASTER_KEY.getName(), getMasterKey())
-                .body(BinsHelper.toJson(testInvalidJsonBinResponseBody, BinRequestBody.class))
                 .when()
                 .post()
                 .then()

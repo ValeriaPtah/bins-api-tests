@@ -3,7 +3,6 @@ package bins;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
-import org.apache.http.HttpStatus;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import util.Headers;
@@ -37,15 +36,17 @@ public class BaseBinsTest {
         createdBinsIds.add(binId);
     }
 
+    public static void removeFromCreatedBinsIds(String binId) {
+        createdBinsIds.remove(binId);
+    }
+
     private static void cleanUpCreatedBins() {
         for (String binId : createdBinsIds) {
             RestAssured.given()
                     .basePath("/b/" + binId)
                     .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                     .when()
-                    .delete()
-                    .then()
-                    .statusCode(HttpStatus.SC_OK);
+                    .delete();
         }
     }
 }

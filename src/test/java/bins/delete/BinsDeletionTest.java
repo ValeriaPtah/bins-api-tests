@@ -17,6 +17,9 @@ import static util.PropertiesHelper.getReadOnlyKey;
 import static util.Schemas.DELETION_SCHEMA;
 import static util.Schemas.ERROR_SCHEMA;
 
+/**
+ * Documentation: <a href="https://jsonbin.io/api-reference/bins/delete">Delete Bins API</a>
+ */
 public class BinsDeletionTest extends BaseBinsTest {
     private final static String BASE_PATH = "/b/";
 
@@ -39,7 +42,13 @@ public class BinsDeletionTest extends BaseBinsTest {
                 .body(matchesJsonSchema(DELETION_SCHEMA.getSchemaFile()));
 
         String deletedBinId = response.body().jsonPath().get("metadata.id");
-        Assert.assertEquals(BinsHelper.getStatusCode_GetBinById(deletedBinId), HttpStatus.SC_NOT_FOUND);
+        int statusCodeForGet = BinsHelper.getStatusCode_GetBinById(deletedBinId);
+
+        Assert.assertEquals(statusCodeForGet, HttpStatus.SC_NOT_FOUND);
+
+        if (statusCodeForGet == HttpStatus.SC_NOT_FOUND) {
+            BaseBinsTest.removeFromCreatedBinsIds(deletedBinId);
+        }
     }
 
     @Test
@@ -57,7 +66,13 @@ public class BinsDeletionTest extends BaseBinsTest {
                 .body(matchesJsonSchema(DELETION_SCHEMA.getSchemaFile()));
 
         String deletedBinId = response.body().jsonPath().get("metadata.id");
-        Assert.assertEquals(BinsHelper.getStatusCode_GetBinById(deletedBinId), HttpStatus.SC_NOT_FOUND);
+        int statusCodeForGet = BinsHelper.getStatusCode_GetBinById(deletedBinId);
+
+        Assert.assertEquals(statusCodeForGet, HttpStatus.SC_NOT_FOUND);
+
+        if (statusCodeForGet == HttpStatus.SC_NOT_FOUND) {
+            BaseBinsTest.removeFromCreatedBinsIds(deletedBinId);
+        }
     }
 
     @Test
