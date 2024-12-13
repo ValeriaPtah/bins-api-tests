@@ -30,7 +30,7 @@ public class BinsDeletionTest extends BaseBinsTest {
 
     @Test
     public void canDeleteBin_MasterKey() {
-        String existingBinId = BinsHelper.getCreatedBinId();
+        String existingBinId = BinsHelper.getCreatedBin_ID();
 
         Response response = RestAssured.given()
                 .basePath(BASE_PATH + existingBinId)
@@ -53,7 +53,7 @@ public class BinsDeletionTest extends BaseBinsTest {
 
     @Test
     public void canDeleteBin_AccessKey() {
-        String existingBinId = BinsHelper.getCreatedBinId();
+        String existingBinId = BinsHelper.getCreatedBin_ID();
 
         Response response = RestAssured.given()
                 .basePath(BASE_PATH + existingBinId)
@@ -118,7 +118,7 @@ public class BinsDeletionTest extends BaseBinsTest {
 
     @Test
     public void canNotDeleteBin_WrongAuth() {
-        String someBinId = "some_id";
+        String someBinId = "67598cfcacd3cb34a8b7d725";
 
         RestAssured.given()
                 .basePath(BASE_PATH + someBinId)

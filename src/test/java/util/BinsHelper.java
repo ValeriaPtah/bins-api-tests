@@ -9,11 +9,13 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.File;
 import java.util.Objects;
 
 import static util.PropertiesHelper.getDeleteCreateKey;
+import static util.PropertiesHelper.getMasterKey;
 import static util.PropertiesHelper.getReadOnlyKey;
 
 public class BinsHelper {
@@ -32,13 +34,10 @@ public class BinsHelper {
 
     public static BinRequestBody testBinRequestBody() {
         return BinRequestBody.builder()
-                .data("{'sample': 'Hello World'}")
-                .build();
-    }
-
-    public static BinRequestBody testBinRequestBody_updated() {
-        return BinRequestBody.builder()
-                .data("{'sample': 'Hello New World!'}")
+                .data(BinRequestBody.getDataBuilder()
+                        .fields("{'sample': 'Hello World'}")
+                        .etag(RandomStringUtils.randomAlphanumeric(15))
+                        .build())
                 .build();
     }
 
@@ -63,17 +62,19 @@ public class BinsHelper {
                 .statusCode();
     }
 
-    public static String getCreatedBinId() {
-        return getCreatedBinId(true);
+    public static String getCreatedBin_ID() {
+        return getCreatedBin_ID(true);
     }
 
-    public static String getCreatedBinId(boolean isPrivate) {
-        String binId = getCreatedBin(isPrivate).get("metadata.id");
-        BaseBinsTest.addToCreatedBinsIds(binId);
-        return binId;
+    public static String getCreatedBin_ID(boolean isPrivate) {
+        return getCreatedBin(isPrivate).get("metadata.id");
     }
 
-    public static JsonPath getCreatedBin(boolean isPrivate) {
+    public static String getBinWithTwoVersions_ID() {
+        return getBinWithTwoVersions_Public().get("metadata.parentId");
+    }
+
+    private static JsonPath getCreatedBin(boolean isPrivate) {
         Response response = RestAssured.given()
                 .basePath("/b")
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
@@ -81,6 +82,25 @@ public class BinsHelper {
                 .body(BinsHelper.toJson(testBinRequestBody(), BinRequestBody.class))
                 .when()
                 .post();
+
+        BaseBinsTest.addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
+
+        return response.body().jsonPath();
+    }
+
+    private static JsonPath getBinWithTwoVersions_Public() {
+        String existingBinId = getCreatedBin_ID(false);
+        Response response = null;
+
+        for (int i = 0; i < 2; i++) {
+            response = RestAssured.given()
+                    .basePath("/b/" + existingBinId)
+                    .header(Headers.MASTER_KEY.getName(), getMasterKey())
+                    .header(Headers.VERSIONING.getName(), true)
+                    .body(BinsHelper.toJson(testBinRequestBody(), BinRequestBody.class))
+                    .when()
+                    .put();
+        }
 
         return response.body().jsonPath();
     }

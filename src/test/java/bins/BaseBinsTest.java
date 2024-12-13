@@ -3,6 +3,8 @@ package bins;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.response.Response;
+import org.apache.http.HttpStatus;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import util.Headers;
@@ -11,10 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static util.PropertiesHelper.getDeleteCreateKey;
+import static util.PropertiesHelper.getMasterKey;
 
 public class BaseBinsTest {
 
-    private static final List<String> createdBinsIds = new ArrayList<>();
+    private final static List<String> CREATED_BINS_IDS = new ArrayList<>();
+    private final static String BASE_PATH = "/b/";
 
     @BeforeClass
     public static void before() {
@@ -33,20 +37,34 @@ public class BaseBinsTest {
     }
 
     public static void addToCreatedBinsIds(String binId) {
-        createdBinsIds.add(binId);
+        CREATED_BINS_IDS.add(binId);
     }
 
     public static void removeFromCreatedBinsIds(String binId) {
-        createdBinsIds.remove(binId);
+        CREATED_BINS_IDS.remove(binId);
     }
 
     private static void cleanUpCreatedBins() {
-        for (String binId : createdBinsIds) {
+        for (String binId : CREATED_BINS_IDS) {
             RestAssured.given()
-                    .basePath("/b/" + binId)
+                    .basePath(BASE_PATH + binId)
                     .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                     .when()
-                    .delete();
+                    .delete()
+                    .then()
+                    .statusCode(HttpStatus.SC_OK);
         }
+    }
+
+    public void enableVersioning(String binId) {
+        Response response = RestAssured.given()
+                .basePath(BASE_PATH + binId)
+                .header(Headers.VERSIONING.getName(), true)
+                .header(Headers.MASTER_KEY.getName(), getMasterKey())
+                .when()
+                .get();
+        response
+                .then()
+                .statusCode(HttpStatus.SC_OK);
     }
 }

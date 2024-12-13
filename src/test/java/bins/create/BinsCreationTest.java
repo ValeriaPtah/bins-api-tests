@@ -14,7 +14,7 @@ import util.Headers;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 import static util.PropertiesHelper.getDeleteCreateKey;
 import static util.PropertiesHelper.getMasterKey;
-import static util.Schemas.CREATION_SCHEMA;
+import static util.Schemas.BIN_SCHEMA;
 
 /**
  * Documentation: <a href="https://jsonbin.io/api-reference/bins/create">Create Bins API</a>
@@ -37,7 +37,7 @@ public class BinsCreationTest extends BaseBinsTest {
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
+                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
 
         addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
     }
@@ -52,7 +52,7 @@ public class BinsCreationTest extends BaseBinsTest {
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
+                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
 
         addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
     }
@@ -68,7 +68,7 @@ public class BinsCreationTest extends BaseBinsTest {
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
+                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
 
         Assert.assertTrue(response.body().jsonPath().get("metadata.private"));
 
@@ -86,7 +86,7 @@ public class BinsCreationTest extends BaseBinsTest {
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
+                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
 
         Assert.assertFalse(response.body().jsonPath().get("metadata.private"));
 
@@ -105,7 +105,7 @@ public class BinsCreationTest extends BaseBinsTest {
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
+                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
 
         Assert.assertEquals(binName, response.body().jsonPath().get("metadata.name"));
 

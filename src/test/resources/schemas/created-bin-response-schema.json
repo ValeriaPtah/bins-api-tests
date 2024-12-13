@@ -5,7 +5,19 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "string"
+          "type": "object",
+          "properties": {
+            "etag": {
+              "type": "string"
+            },
+            "fields": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "etag",
+            "fields"
+          ]
         }
       },
       "required": [

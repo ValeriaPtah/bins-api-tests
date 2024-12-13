@@ -8,7 +8,7 @@ import java.io.File;
 @Getter
 @AllArgsConstructor
 public enum Schemas {
-    CREATION_SCHEMA("created-bin-response-schema.json"),
+    BIN_SCHEMA("created-bin-response-schema.json"),
     DELETION_SCHEMA("deleted-bin-response-schema.json"),
     ERROR_SCHEMA("error-response-schema.json");
 

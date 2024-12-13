@@ -9,6 +9,19 @@ import lombok.Data;
 public class BinRequestBody {
 
     @Json
-    private String data;
-}
+    private BinData data;
 
+    public static BinData.BinDataBuilder getDataBuilder() {
+        return BinData.builder();
+    }
+
+    @Data
+    @Builder
+    public static class BinData {
+        @Json
+        private String fields;
+
+        @Json
+        private String etag;
+    }
+}
