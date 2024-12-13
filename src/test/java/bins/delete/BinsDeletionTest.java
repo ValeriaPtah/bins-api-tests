@@ -118,7 +118,7 @@ public class BinsDeletionTest extends BaseBinsTest {
 
     @Test
     public void canNotDeleteBin_WrongAuth() {
-        String someBinId = "67598cfcacd3cb34a8b7d725";
+        String someBinId = "some_id";
 
         RestAssured.given()
                 .basePath(BASE_PATH + someBinId)
