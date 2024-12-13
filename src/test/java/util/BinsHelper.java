@@ -61,8 +61,7 @@ public class BinsHelper {
                 .statusCode();
     }
 
-    //TODO refactor for purpose
-    public static String getExistingBinById() {
+    public static String getCreatedBinId() {
         Response response = RestAssured.given()
                 .basePath("/b")
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())

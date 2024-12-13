@@ -3,15 +3,13 @@ package bins.create;
 import bins.BaseBinsTest;
 import bins.model.BinRequestBody;
 import io.restassured.RestAssured;
-import io.restassured.response.ValidatableResponse;
+import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import util.BinsHelper;
 import util.Headers;
-
-import java.io.File;
 
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 import static util.PropertiesHelper.getDeleteCreateKey;
@@ -20,8 +18,6 @@ import static util.Schemas.CREATION_SCHEMA;
 
 public class BinsCreationTest extends BaseBinsTest {
     private final static BinRequestBody VALID_BIN_REQUEST_BODY = BinsHelper.testBinRequestBody();
-    private final static int SUCCESS_STATUS = HttpStatus.SC_OK;
-    private final static File CREATED_BIN_SCHEMA = CREATION_SCHEMA.getSchemaFile();
 
     @BeforeClass
     public static void setup() {
@@ -30,55 +26,67 @@ public class BinsCreationTest extends BaseBinsTest {
 
     @Test
     public void canCreateBin_MasterKey() {
-        RestAssured.given()
+        Response response = RestAssured.given()
                 .header(Headers.MASTER_KEY.getName(), getMasterKey())
                 .body(BinsHelper.toJson(VALID_BIN_REQUEST_BODY, BinRequestBody.class))
                 .when()
-                .post()
+                .post();
+        response
                 .then()
-                .statusCode(SUCCESS_STATUS)
-                .body(matchesJsonSchema(CREATED_BIN_SCHEMA));
+                .statusCode(HttpStatus.SC_OK)
+                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
+
+        addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
     }
 
     @Test
     public void canCreateBin_AccessKey() {
-        RestAssured.given()
+        Response response = RestAssured.given()
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                 .body(BinsHelper.toJson(VALID_BIN_REQUEST_BODY, BinRequestBody.class))
                 .when()
-                .post()
+                .post();
+        response
                 .then()
-                .statusCode(SUCCESS_STATUS)
-                .body(matchesJsonSchema(CREATED_BIN_SCHEMA));
+                .statusCode(HttpStatus.SC_OK)
+                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
+
+        addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
     }
 
     @Test
     public void canCreateBin_Private() {
-        ValidatableResponse response = RestAssured.given()
+        Response response = RestAssured.given()
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                 .header(Headers.PRIVATE_BIN.getName(), true)
                 .body(BinsHelper.toJson(VALID_BIN_REQUEST_BODY, BinRequestBody.class))
                 .when()
-                .post()
+                .post();
+        response
                 .then()
-                .statusCode(SUCCESS_STATUS)
-                .body(matchesJsonSchema(CREATED_BIN_SCHEMA));
+                .statusCode(HttpStatus.SC_OK)
+                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
 
-        Assert.assertTrue(response.extract().body().jsonPath().get("metadata.private"));
+        Assert.assertTrue(response.body().jsonPath().get("metadata.private"));
+
+        addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
     }
 
     @Test
     public void canCreateBin_Public() {
-        ValidatableResponse response = RestAssured.given()
+        Response response = RestAssured.given()
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                 .header(Headers.PRIVATE_BIN.getName(), false)
                 .body(BinsHelper.toJson(VALID_BIN_REQUEST_BODY, BinRequestBody.class))
                 .when()
-                .post()
+                .post();
+        response
                 .then()
-                .statusCode(SUCCESS_STATUS)
-                .body(matchesJsonSchema(CREATED_BIN_SCHEMA));
+                .statusCode(HttpStatus.SC_OK)
+                .body(matchesJsonSchema(CREATION_SCHEMA.getSchemaFile()));
 
-        Assert.assertFalse(response.extract().body().jsonPath().get("metadata.private"));
+        Assert.assertFalse(response.body().jsonPath().get("metadata.private"));
+
+        addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
     }
 }

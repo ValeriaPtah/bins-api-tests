@@ -9,8 +9,6 @@ import org.testng.annotations.Test;
 import util.BinsHelper;
 import util.Headers;
 
-import java.io.File;
-
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 import static util.PropertiesHelper.getMasterKey;
 import static util.PropertiesHelper.getReadOnlyKey;
@@ -18,7 +16,6 @@ import static util.Schemas.ERROR_SCHEMA;
 
 public class BinsNegativeCreationTest {
     private final static BinRequestBody VALID_TEST_BIN_RESPONSE_BODY = BinsHelper.testBinRequestBody();
-    private final static File ERROR_MESSAGE_SCHEMA = ERROR_SCHEMA.getSchemaFile();
 
     @BeforeClass
     public static void setup() {
@@ -39,7 +36,7 @@ public class BinsNegativeCreationTest {
                 .post()
                 .then()
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
-                .body(matchesJsonSchema(ERROR_MESSAGE_SCHEMA));
+                .body(matchesJsonSchema(ERROR_SCHEMA.getSchemaFile()));
     }
 
     @Test
@@ -52,7 +49,7 @@ public class BinsNegativeCreationTest {
                 .post()
                 .then()
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
-                .body(matchesJsonSchema(ERROR_MESSAGE_SCHEMA));
+                .body(matchesJsonSchema(ERROR_SCHEMA.getSchemaFile()));
     }
 
     @Test
@@ -63,7 +60,7 @@ public class BinsNegativeCreationTest {
                 .post()
                 .then()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED)
-                .body(matchesJsonSchema(ERROR_MESSAGE_SCHEMA));
+                .body(matchesJsonSchema(ERROR_SCHEMA.getSchemaFile()));
     }
 
     @Test
@@ -75,7 +72,7 @@ public class BinsNegativeCreationTest {
                 .post()
                 .then()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED)
-                .body(matchesJsonSchema(ERROR_MESSAGE_SCHEMA));
+                .body(matchesJsonSchema(ERROR_SCHEMA.getSchemaFile()));
     }
 
     @Test
@@ -89,6 +86,6 @@ public class BinsNegativeCreationTest {
                 .post()
                 .then()
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
-                .body(matchesJsonSchema(ERROR_MESSAGE_SCHEMA));
+                .body(matchesJsonSchema(ERROR_SCHEMA.getSchemaFile()));
     }
 }
