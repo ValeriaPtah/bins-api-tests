@@ -5,27 +5,31 @@ import bins.model.BinRequestBody;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import util.BinsHelper;
 import util.Headers;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static util.PropertiesHelper.getBasePath;
 import static util.PropertiesHelper.getMasterKey;
+import static util.PropertiesHelper.getPath_BinParentId;
+import static util.PropertiesHelper.getPath_BinVersion;
+import static util.PropertiesHelper.getPath_Etag;
 import static util.PropertiesHelper.getUpdateOnlyKey;
 
 /**
  * Documentation: <a href="https://jsonbin.io/api-reference/bins/update">Update Bins API</a>
  */
 public class BinsUpdateTest extends BaseBinsTest {
-    private final static BinRequestBody VALID_TO_UPDATE_BIN_REQUEST_BODY = BinsHelper.testBinRequestBody();
+    private static final BinRequestBody VALID_TO_UPDATE_BIN_REQUEST_BODY = BinsHelper.testBinRequestBody();
 
     @BeforeClass
     public static void setup() {
-        testSetup("");
+        testSetup();
     }
 
     @Test
@@ -33,7 +37,7 @@ public class BinsUpdateTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getCreatedBin_ID();
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId)
+                .basePath(getBasePath() + existingBinId)
                 .header(Headers.MASTER_KEY.getName(), getMasterKey())
                 .body(BinsHelper.toJson(VALID_TO_UPDATE_BIN_REQUEST_BODY, BinRequestBody.class))
                 .when()
@@ -41,9 +45,8 @@ public class BinsUpdateTest extends BaseBinsTest {
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body("record.data.etag", equalTo(VALID_TO_UPDATE_BIN_REQUEST_BODY.getData().getEtag()));
-
-        Assert.assertEquals(existingBinId, response.body().jsonPath().get("metadata.parentId"));
+                .body(getPath_Etag(), equalTo(VALID_TO_UPDATE_BIN_REQUEST_BODY.getData().getEtag()))
+                .body(getPath_BinParentId(), equalTo(existingBinId));
     }
 
     @Test
@@ -51,7 +54,7 @@ public class BinsUpdateTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getCreatedBin_ID();
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId)
+                .basePath(getBasePath() + existingBinId)
                 .header(Headers.ACCESS_KEY.getName(), getUpdateOnlyKey())
                 .body(BinsHelper.toJson(VALID_TO_UPDATE_BIN_REQUEST_BODY, BinRequestBody.class))
                 .when()
@@ -59,9 +62,8 @@ public class BinsUpdateTest extends BaseBinsTest {
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body("record.data.etag", equalTo(VALID_TO_UPDATE_BIN_REQUEST_BODY.getData().getEtag()));
-
-        Assert.assertEquals(existingBinId, response.body().jsonPath().get("metadata.parentId"));
+                .body(getPath_Etag(), equalTo(VALID_TO_UPDATE_BIN_REQUEST_BODY.getData().getEtag()))
+                .body(getPath_BinParentId(), equalTo(existingBinId));
     }
 
     @Test
@@ -69,16 +71,15 @@ public class BinsUpdateTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getCreatedBin_ID(false);
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId)
+                .basePath(getBasePath() + existingBinId)
                 .body(BinsHelper.toJson(VALID_TO_UPDATE_BIN_REQUEST_BODY, BinRequestBody.class))
                 .when()
                 .put();
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body("record.data.etag", equalTo(VALID_TO_UPDATE_BIN_REQUEST_BODY.getData().getEtag()));
-
-        Assert.assertTrue((int) response.body().jsonPath().get("metadata.version") > 0);
+                .body(getPath_Etag(), equalTo(VALID_TO_UPDATE_BIN_REQUEST_BODY.getData().getEtag()))
+                .body(getPath_BinVersion(), greaterThan(0));
     }
 
     @Test
@@ -86,7 +87,7 @@ public class BinsUpdateTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getCreatedBin_ID(false);
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId)
+                .basePath(getBasePath() + existingBinId)
                 .header(Headers.VERSIONING.getName(), false)
                 .header(Headers.MASTER_KEY.getName(), getMasterKey())
                 .body(BinsHelper.toJson(VALID_TO_UPDATE_BIN_REQUEST_BODY, BinRequestBody.class))
@@ -95,10 +96,10 @@ public class BinsUpdateTest extends BaseBinsTest {
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body("record.data.etag", equalTo(VALID_TO_UPDATE_BIN_REQUEST_BODY.getData().getEtag()))
-                .body("metadata.version", is(nullValue()));
+                .body(getPath_Etag(), equalTo(VALID_TO_UPDATE_BIN_REQUEST_BODY.getData().getEtag()))
+                .body(getPath_BinVersion(), is(nullValue()))
+                .body(getPath_BinParentId(), equalTo(existingBinId));
 
-        Assert.assertEquals(existingBinId, response.body().jsonPath().get("metadata.parentId"));
         enableVersioning(existingBinId);
     }
 

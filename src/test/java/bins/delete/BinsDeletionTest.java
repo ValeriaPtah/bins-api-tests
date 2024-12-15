@@ -11,8 +11,10 @@ import util.BinsHelper;
 import util.Headers;
 
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
+import static util.PropertiesHelper.getBasePath;
 import static util.PropertiesHelper.getDeleteCreateKey;
 import static util.PropertiesHelper.getMasterKey;
+import static util.PropertiesHelper.getPath_BinID;
 import static util.PropertiesHelper.getReadOnlyKey;
 import static util.Schemas.DELETION_SCHEMA;
 import static util.Schemas.ERROR_SCHEMA;
@@ -21,10 +23,11 @@ import static util.Schemas.ERROR_SCHEMA;
  * Documentation: <a href="https://jsonbin.io/api-reference/bins/delete">Delete Bins API</a>
  */
 public class BinsDeletionTest extends BaseBinsTest {
+    private static final String NOT_EXISTS_BIN_ID = "67598cfcacd3cb34a8b7d725";
 
     @BeforeClass
     public static void setup() {
-        testSetup("");
+        testSetup();
     }
 
     @Test
@@ -32,7 +35,7 @@ public class BinsDeletionTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getCreatedBin_ID();
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId)
+                .basePath(getBasePath() + existingBinId)
                 .header(Headers.MASTER_KEY.getName(), getMasterKey())
                 .when()
                 .delete();
@@ -40,7 +43,7 @@ public class BinsDeletionTest extends BaseBinsTest {
                 .statusCode(HttpStatus.SC_OK)
                 .body(matchesJsonSchema(DELETION_SCHEMA.getSchemaFile()));
 
-        String deletedBinId = response.body().jsonPath().get("metadata.id");
+        String deletedBinId = response.body().jsonPath().get(getPath_BinID());
         int statusCodeForGet = BinsHelper.getStatusCode_GetBinById(deletedBinId);
 
         Assert.assertEquals(statusCodeForGet, HttpStatus.SC_NOT_FOUND);
@@ -55,7 +58,7 @@ public class BinsDeletionTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getCreatedBin_ID();
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId)
+                .basePath(getBasePath() + existingBinId)
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                 .when()
                 .delete();
@@ -64,7 +67,7 @@ public class BinsDeletionTest extends BaseBinsTest {
                 .statusCode(HttpStatus.SC_OK)
                 .body(matchesJsonSchema(DELETION_SCHEMA.getSchemaFile()));
 
-        String deletedBinId = response.body().jsonPath().get("metadata.id");
+        String deletedBinId = response.body().jsonPath().get(getPath_BinID());
         int statusCodeForGet = BinsHelper.getStatusCode_GetBinById(deletedBinId);
 
         Assert.assertEquals(statusCodeForGet, HttpStatus.SC_NOT_FOUND);
@@ -76,10 +79,8 @@ public class BinsDeletionTest extends BaseBinsTest {
 
     @Test
     public void canNotDeleteBin_NotExist() {
-        String NoneExistingBinId = "67598cfcacd3cb34a8b7d725";
-
         RestAssured.given()
-                .basePath(BASE_PATH + NoneExistingBinId)
+                .basePath(getBasePath() + NOT_EXISTS_BIN_ID)
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                 .when()
                 .delete()
@@ -93,7 +94,7 @@ public class BinsDeletionTest extends BaseBinsTest {
         String invalidBinId = "some_id";
 
         RestAssured.given()
-                .basePath(BASE_PATH + invalidBinId)
+                .basePath(getBasePath() + invalidBinId)
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                 .when()
                 .delete()
@@ -104,10 +105,8 @@ public class BinsDeletionTest extends BaseBinsTest {
 
     @Test
     public void canNotDeleteBin_NoAuth() {
-        String someBinId = "some_id";
-
         RestAssured.given()
-                .basePath(BASE_PATH + someBinId)
+                .basePath(getBasePath() + NOT_EXISTS_BIN_ID)
                 .when()
                 .delete()
                 .then()
@@ -117,10 +116,8 @@ public class BinsDeletionTest extends BaseBinsTest {
 
     @Test
     public void canNotDeleteBin_WrongAuth() {
-        String someBinId = "67598cfcacd3cb34a8b7d725";
-
         RestAssured.given()
-                .basePath(BASE_PATH + someBinId)
+                .basePath(getBasePath() + NOT_EXISTS_BIN_ID)
                 .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
                 .when()
                 .delete()

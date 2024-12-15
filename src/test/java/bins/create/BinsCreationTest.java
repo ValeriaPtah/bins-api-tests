@@ -12,19 +12,23 @@ import util.BinsHelper;
 import util.Headers;
 
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
+import static util.PropertiesHelper.getBasePath;
 import static util.PropertiesHelper.getDeleteCreateKey;
 import static util.PropertiesHelper.getMasterKey;
+import static util.PropertiesHelper.getPath_BinAccess;
+import static util.PropertiesHelper.getPath_BinID;
+import static util.PropertiesHelper.getPath_BinName;
 import static util.Schemas.BIN_SCHEMA;
 
 /**
  * Documentation: <a href="https://jsonbin.io/api-reference/bins/create">Create Bins API</a>
  */
 public class BinsCreationTest extends BaseBinsTest {
-    private final static BinRequestBody VALID_BIN_REQUEST_BODY = BinsHelper.testBinRequestBody();
+    private static final BinRequestBody VALID_BIN_REQUEST_BODY = BinsHelper.testBinRequestBody();
 
     @BeforeClass
     public static void setup() {
-        testSetup("/b");
+        testSetup(getBasePath());
     }
 
     @Test
@@ -39,7 +43,7 @@ public class BinsCreationTest extends BaseBinsTest {
                 .statusCode(HttpStatus.SC_OK)
                 .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
 
-        addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
+        addToCreatedBinsIds(response.body().jsonPath().get(getPath_BinID()));
     }
 
     @Test
@@ -54,7 +58,7 @@ public class BinsCreationTest extends BaseBinsTest {
                 .statusCode(HttpStatus.SC_OK)
                 .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
 
-        addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
+        addToCreatedBinsIds(response.body().jsonPath().get(getPath_BinID()));
     }
 
     @Test
@@ -70,9 +74,9 @@ public class BinsCreationTest extends BaseBinsTest {
                 .statusCode(HttpStatus.SC_OK)
                 .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
 
-        Assert.assertTrue(response.body().jsonPath().get("metadata.private"));
+        Assert.assertTrue(response.body().jsonPath().get(getPath_BinAccess()));
 
-        addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
+        addToCreatedBinsIds(response.body().jsonPath().get(getPath_BinID()));
     }
 
     @Test
@@ -88,9 +92,9 @@ public class BinsCreationTest extends BaseBinsTest {
                 .statusCode(HttpStatus.SC_OK)
                 .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
 
-        Assert.assertFalse(response.body().jsonPath().get("metadata.private"));
+        Assert.assertFalse(response.body().jsonPath().get(getPath_BinAccess()));
 
-        addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
+        addToCreatedBinsIds(response.body().jsonPath().get(getPath_BinID()));
     }
 
     @Test
@@ -107,8 +111,8 @@ public class BinsCreationTest extends BaseBinsTest {
                 .statusCode(HttpStatus.SC_OK)
                 .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
 
-        Assert.assertEquals(binName, response.body().jsonPath().get("metadata.name"));
+        Assert.assertEquals(binName, response.body().jsonPath().get(getPath_BinName()));
 
-        addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
+        addToCreatedBinsIds(response.body().jsonPath().get(getPath_BinID()));
     }
 }

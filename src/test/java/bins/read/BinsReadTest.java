@@ -5,24 +5,30 @@ import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import util.BinsHelper;
 import util.Headers;
 
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static util.PropertiesHelper.getBasePath;
 import static util.PropertiesHelper.getMasterKey;
+import static util.PropertiesHelper.getPath_BinID;
+import static util.PropertiesHelper.getPath_Etag;
 import static util.PropertiesHelper.getReadOnlyKey;
 import static util.Schemas.BIN_SCHEMA;
 
+/**
+ * Documentation: <a href="https://jsonbin.io/api-reference/bins/read">Read Bins API</a>
+ */
 public class BinsReadTest extends BaseBinsTest {
 
     @BeforeClass
     public static void setup() {
-        testSetup("");
+        testSetup();
     }
 
     @Test
@@ -30,7 +36,7 @@ public class BinsReadTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getCreatedBin_ID();
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId)
+                .basePath(getBasePath() + existingBinId)
                 .header(Headers.MASTER_KEY.getName(), getMasterKey())
                 .when()
                 .get();
@@ -45,7 +51,7 @@ public class BinsReadTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getCreatedBin_ID();
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId)
+                .basePath(getBasePath() + existingBinId)
                 .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
                 .when()
                 .get();
@@ -60,7 +66,7 @@ public class BinsReadTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getCreatedBin_ID(false);
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId)
+                .basePath(getBasePath() + existingBinId)
                 .when()
                 .get();
         response
@@ -75,17 +81,15 @@ public class BinsReadTest extends BaseBinsTest {
         String version = "1";
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId + "/" + version)
+                .basePath(getBasePath() + existingBinId + "/" + version)
                 .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
                 .when()
                 .get();
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
-
-        Assert.assertEquals(BinsHelper.getEtagByVersion(Integer.parseInt(version)),
-                response.getBody().jsonPath().getString("record.data.etag"));
+                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()))
+                .body(getPath_Etag(), equalTo(BinsHelper.getEtagByVersion(Integer.parseInt(version))));
     }
 
     @Test
@@ -93,7 +97,7 @@ public class BinsReadTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getCreatedBin_ID();
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId)
+                .basePath(getBasePath() + existingBinId)
                 .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
                 .queryParam("meta", false)
                 .when()
@@ -109,7 +113,7 @@ public class BinsReadTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getCreatedBin_ID();
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId)
+                .basePath(getBasePath() + existingBinId)
                 .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
                 .header(Headers.METADATA.getName(), false)
                 .when()
@@ -125,35 +129,31 @@ public class BinsReadTest extends BaseBinsTest {
         String existingBinId = BinsHelper.getBinWithTwoVersions_ID();
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId + "/latest")
+                .basePath(getBasePath() + existingBinId + "/latest")
                 .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
                 .when()
                 .get();
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
-
-        Assert.assertEquals(BinsHelper.getEtagLatestVersion(),
-                response.getBody().jsonPath().getString("record.data.etag"));
+                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()))
+                .body(getPath_Etag(), equalTo(BinsHelper.getEtagLatestVersion()));
     }
 
     @Test
     public void canReadLatestVersion_NoVersion() {
         JsonPath existingBin = BinsHelper.getCreatedBin(false);
-        String existingBinId = existingBin.get("metadata.id");
+        String existingBinId = existingBin.get(getPath_BinID());
 
         Response response = RestAssured.given()
-                .basePath(BASE_PATH + existingBinId + "/latest")
+                .basePath(getBasePath() + existingBinId + "/latest")
                 .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
                 .when()
                 .get();
         response
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()));
-
-        Assert.assertEquals(existingBin.get("record.data.etag"),
-                response.getBody().jsonPath().getString("record.data.etag"));
+                .body(matchesJsonSchema(BIN_SCHEMA.getSchemaFile()))
+                .body(getPath_Etag(), equalTo(existingBin.get(getPath_Etag())));
     }
 }

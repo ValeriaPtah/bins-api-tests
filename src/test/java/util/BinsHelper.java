@@ -8,17 +8,18 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
+import static util.PropertiesHelper.getBasePath;
 import static util.PropertiesHelper.getDeleteCreateKey;
 import static util.PropertiesHelper.getMasterKey;
+import static util.PropertiesHelper.getPath_BinID;
+import static util.PropertiesHelper.getPath_BinParentId;
+import static util.PropertiesHelper.getPath_Etag;
 import static util.PropertiesHelper.getReadOnlyKey;
 
 public class BinsHelper {
-
     private static final Moshi MOSHI = new Moshi.Builder().build();
     private static final Map<Integer, String> VERSION_ETAG = new HashMap<>();
 
@@ -38,14 +39,9 @@ public class BinsHelper {
                 .toJson(object);
     }
 
-    public static File getJsonSchema(String schemaName) {
-        ClassLoader classLoader = BinsHelper.class.getClassLoader();
-        return new File((Objects.requireNonNull(classLoader.getResource("schemas/" + schemaName)).getFile()));
-    }
-
     public static int getStatusCode_GetBinById(String binId) {
         return RestAssured.given()
-                .basePath("/b/" + binId)
+                .basePath(getBasePath() + binId)
                 .header(Headers.ACCESS_KEY.getName(), getReadOnlyKey())
                 .when()
                 .get()
@@ -57,11 +53,11 @@ public class BinsHelper {
     }
 
     public static String getCreatedBin_ID(boolean isPrivate) {
-        return getCreatedBin(isPrivate).get("metadata.id");
+        return getCreatedBin(isPrivate).get(getPath_BinID());
     }
 
     public static String getBinWithTwoVersions_ID() {
-        return getBinWithTwoVersions_Public().get("metadata.parentId");
+        return getBinWithTwoVersions_Public().get(getPath_BinParentId());
     }
 
     public static String getEtagByVersion(int version) {
@@ -74,14 +70,14 @@ public class BinsHelper {
 
     public static JsonPath getCreatedBin(boolean isPrivate) {
         Response response = RestAssured.given()
-                .basePath("/b")
+                .basePath(getBasePath())
                 .header(Headers.ACCESS_KEY.getName(), getDeleteCreateKey())
                 .header(Headers.PRIVATE_BIN.getName(), isPrivate)
                 .body(BinsHelper.toJson(testBinRequestBody(), BinRequestBody.class))
                 .when()
                 .post();
 
-        BaseBinsTest.addToCreatedBinsIds(response.body().jsonPath().get("metadata.id"));
+        BaseBinsTest.addToCreatedBinsIds(response.body().jsonPath().get(getPath_BinID()));
 
         return response.body().jsonPath();
     }
@@ -92,13 +88,13 @@ public class BinsHelper {
 
         for (int i = 1; i <= 2; i++) {
             response = RestAssured.given()
-                    .basePath("/b/" + existingBinId)
+                    .basePath(getBasePath() + existingBinId)
                     .header(Headers.MASTER_KEY.getName(), getMasterKey())
                     .header(Headers.VERSIONING.getName(), true)
                     .body(BinsHelper.toJson(testBinRequestBody(), BinRequestBody.class))
                     .when()
                     .put();
-            VERSION_ETAG.put(i, response.body().jsonPath().get("record.data.etag"));
+            VERSION_ETAG.put(i, response.body().jsonPath().get(getPath_Etag()));
         }
 
         return response.body().jsonPath();
