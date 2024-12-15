@@ -1,0 +1,79 @@
+stages:
+  - setup
+  - build
+  - test
+
+variables:
+  # Default JDK version for the environment
+  JDK_VERSION: "11"
+
+cache:
+  paths:
+    - .gradle/caches/
+    - .gradle/wrapper/
+
+setup:
+  stage: setup
+  image: gradle:8.11.1-jdk11
+  script:
+    - echo "Environment setup complete."
+
+build:
+  stage: build
+  image: gradle:8.11.1-jdk11
+  script:
+    - gradle clean assemble
+  artifacts:
+    paths:
+      - build/libs/
+  only:
+    - merge_requests
+    - main
+    - branches
+  needs: [ "setup" ]
+
+e2e-tests:
+  stage: test
+  image: gradle:8.11.1-jdk11
+  script:
+    - gradle clean test -Dtestng.groups=!open-bug,!flaky
+  artifacts:
+    paths:
+      - build/test-results/test/
+      - build/reports/tests/
+  only:
+    - merge_requests
+    - main
+    - branches
+  needs: [ "build" ]
+
+
+flaky-tests:
+  stage: test
+  image: gradle:8.11.1-jdk11
+  script:
+    - gradle clean test -Dtestng.groups=flaky
+  artifacts:
+    paths:
+      - build/test-results/test/
+      - build/reports/tests/
+  only:
+    - merge_requests
+    - main
+    - branches
+  needs: [ "build" ]
+
+open-bugs:
+  stage: test
+  image: gradle:8.11.1-jdk11
+  script:
+    - gradle clean test -Dtestng.groups=open-bug
+  artifacts:
+    paths:
+      - build/test-results/test/
+      - build/reports/tests/
+  only:
+    - merge_requests
+    - main
+    - branches
+  needs: [ "build" ]

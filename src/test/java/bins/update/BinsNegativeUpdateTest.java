@@ -34,7 +34,7 @@ public class BinsNegativeUpdateTest extends BaseBinsTest {
      * a bug or a fault in documentation
      * <a href="https://jsonbin.io/api-reference/bins/update#request-headers">X-Bin-Versioning</a>
      */
-    @Test(enabled = false)
+    @Test(enabled = false, groups = "open-bug")
     public void canNotDisableVersioning_WithAccessKey_ForPublic() {
         String existingBinId = BinsHelper.getCreatedBin_ID(false);
 
